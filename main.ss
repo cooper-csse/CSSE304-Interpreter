@@ -1,17 +1,27 @@
-; evaluator for simple expressions.
-; Possible starting point for first interpreter assignment.
-;                  
-; Claude Anderson.  Last modified April, 2014
+; Cooper Anderson, Joe Peters
+; Interpreter Project
+; 2019-10-14
+; CSSE304-03
 
-(load "chez-init.ss") 
+(load "chez-init.ss")
 
-(define load-all ; make it easy to reload the files
-  (lambda ()
-    (load "datatypes.ss")
-    (load "parse.ss")
-    (load "env.ss")
-    (load "interpreter.ss")))
+(define load-all
+	(lambda ()
+		(load "datatypes.ss")
+		(load "parse.ss")
+		(load "env.ss")
+		(load "interpreter.ss")
+	)
+)
 
 (load-all)
 
-(define l load-all) ; even easier!
+(define l load-all)
+
+(load "tests.ss")
+(r)
+
+; (map pretty-print (reverse (list
+
+; )))
+
