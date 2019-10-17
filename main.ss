@@ -18,10 +18,5 @@
 
 (define l load-all)
 
-(load "tests.ss")
-(r)
-
-; (map pretty-print (reverse (list
-
-; )))
-
+; (load "tests.ss")
+; (r)
