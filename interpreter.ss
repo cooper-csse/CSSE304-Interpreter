@@ -40,17 +40,24 @@
 				(eval-exp alternative env)
 			)
 		]
-		; [let-type (inner)
-		; 	(cases let-type inner
-		; 		[normal-let (vars vals body)
-		; 			(extend-env
-		; 				vars
-		; 				(map (lambda (item) (eval-exp item env)) vals)
-		; 				env
-		; 			)
-		; 		]
-		; 	)
-		; ]
+		[let-exp (inner)
+			(cases let-type inner
+				[normal-let (vars vals body)
+					(eval-bodies body (extend-env
+						vars
+						(map (lambda (item) (eval-exp item env)) vals)
+						env
+					))
+				]
+				[else (void)]
+			)
+		]
+		[lambda-exp (id body)
+			(closure id body env)
+		]
+		[lambda-n-exp (id body)
+			(void)
+		]
 		[app-exp (rator rands)
 			(let ([proc-value (eval-exp rator env)])
 				(if (eq? proc-value 'quote) (unparse-exp (1th rands))
@@ -68,6 +75,16 @@
 	(map (lambda (item) (eval-exp item env)) rands)
 )
 
+(define (eval-bodies bodies env)
+	(if (null? (cdr bodies))
+		(eval-exp (car bodies) env)
+		(begin
+			(eval-exp (car bodies) env)
+			(eval-bodies (cdr bodies) env)
+		)
+	)
+)
+
 ;  Apply a procedure to its arguments.
 ;  At this point, we only have primitive procedures.
 ;  User-defined procedures will be added later.
@@ -76,10 +93,26 @@
 	(cases proc-val proc-value
 		[prim-proc (op) (apply-prim-proc op args)]
 		; You will add other cases
+		[closure (vars bodies env)
+			(if (= (length args) (length vars))
+				(run-closure bodies (extend-env vars args env))
+				(error 'apply-proc "wrong number of arguments to #<procedure>")
+			)
+		]
 		[else (error 'apply-proc
 			"Attempt to apply bad procedure: ~s"
 			proc-value)
 		]
+	)
+)
+
+(define (run-closure bodies env)
+	(if (null? (cdr bodies))
+		(eval-exp (car bodies) env)
+		(begin
+			(eval-exp (car bodies) env)
+			(run-closure (cdr bodies) env)
+		)
 	)
 )
 
