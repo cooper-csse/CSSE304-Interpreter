@@ -11,32 +11,32 @@
 		     (a b c)
 		     (#t #t #f)
 		     )]
-          [answers 
-            (list 
+          [answers
+            (list
 	     (eval-one-exp '
-	      (list (procedure? +) 
+	      (list (procedure? +)
 		    (not (procedure? (+ 3 4)))))
-	     (eval-one-exp ' 
-	      (list (procedure? procedure?) 
-		    (procedure? (lambda(x) x)) 
+	     (eval-one-exp '
+	      (list (procedure? procedure?)
+		    (procedure? (lambda(x) x))
 		    (not (procedure? '(lambda (x) x)))))
-	     (eval-one-exp ' 
-	      (list (procedure? list) 
-		    (procedure? map) 
-		    (procedure? apply) 
+	     (eval-one-exp '
+	      (list (procedure? list)
+		    (procedure? map)
+		    (procedure? apply)
 		    (procedure? #t)))
-	     (eval-one-exp ' 
-	      (map procedure? 
+	     (eval-one-exp '
+	      (map procedure?
 		   (list map car 3 (lambda(x) x) (lambda x x) ((lambda () 2)))))
 	     (eval-one-exp '(apply list (list 3 4 5)))
-	     (eval-one-exp ' (list (vector? (vector 3)) 
-				   (vector-ref (vector 2 4 5) 
+	     (eval-one-exp ' (list (vector? (vector 3))
+				   (vector-ref (vector 2 4 5)
 					       (vector-ref (vector 2 4 5) 0))))
 	     (eval-one-exp '(length '(a b c d e)))
 	     (eval-one-exp '(vector->list '#(a b c)))
-	     (eval-one-exp ' (list (procedure? list) 
-				   (procedure? (lambda (x y) 
-						 (list (+ x y)))) 
+	     (eval-one-exp ' (list (procedure? list)
+				   (procedure? (lambda (x y)
+						 (list (+ x y))))
 				   (procedure? 'list)))
 
 	     )])
@@ -50,35 +50,35 @@
 		     720
 		     (#t #t #f)
 		     )]
-          [answers 
-            (list 
+          [answers
+            (list
 	     (eval-one-exp '((lambda (x) (+ 1 x)) 5))
 	     (eval-one-exp '((lambda (x) (+ 1 x) (+ 2 (* 2 x))) 5))
-	     (eval-one-exp ' 
-	      ((lambda (a b) 
-		 (let ([a (+ a b)] 
-		       [b (- a b)]) 
-		   (let ([f (lambda (a) (+ a b))]) 
-		     (f (+ 3 a b))))) 
-	       56 
+	     (eval-one-exp '
+	      ((lambda (a b)
+		 (let ([a (+ a b)]
+		       [b (- a b)])
+		   (let ([f (lambda (a) (+ a b))])
+		     (f (+ 3 a b)))))
+	       56
 	       17))
-	     (eval-one-exp ' 
-	      (((lambda (f) 
-		  ((lambda (x) 
-		     (f (lambda (y) ((x x) y)))) 
-		   (lambda (x) 
-		     (f (lambda (y) ((x x) y)))))) 
-		(lambda (g) 
-		  (lambda (n) 
+	     (eval-one-exp '
+	      (((lambda (f)
+		  ((lambda (x)
+		     (f (lambda (y) ((x x) y))))
+		   (lambda (x)
+		     (f (lambda (y) ((x x) y))))))
+		(lambda (g)
+		  (lambda (n)
 		    (if (zero? n) 1 (* n (g (- n 1))))))) 6))
-	     (eval-one-exp ' 
-	      (let ([Y (lambda (f) 
-			 ((lambda (x) (f (lambda (y) ((x x) y)))) 
-			  (lambda (x) (f (lambda (y) ((x x) y))))))] 
-		    [H (lambda (g) (lambda (x) 
-				     (if (null? x) '() 
-					 (cons (procedure? (car x)) 
-					       (g (cdr x))))))]) 
+	     (eval-one-exp '
+	      (let ([Y (lambda (f)
+			 ((lambda (x) (f (lambda (y) ((x x) y))))
+			  (lambda (x) (f (lambda (y) ((x x) y))))))]
+		    [H (lambda (g) (lambda (x)
+				     (if (null? x) '()
+					 (cons (procedure? (car x))
+					       (g (cdr x))))))])
 		((Y H) (list list (lambda (x) x) 'list))))
 	     )])
       (display-results correct answers equal?)))
@@ -89,16 +89,16 @@
 		     (9 2 1)
 		     two
 		     )]
-          [answers 
-            (list 
+          [answers
+            (list
 	     (eval-one-exp '((lambda x (car x) (cdr x)) 'a 'b 'c))
-	     (eval-one-exp '((lambda (x y . z) 
-			       (cons (+ x y) (cdr z))) 
+	     (eval-one-exp '((lambda (x y . z)
+			       (cons (+ x y) (cdr z)))
 			     5 4 3 2 1))
-	     (eval-one-exp ' ((lambda (x y . z) 
-				(if (> x y) 
-				    (car z) 
-				    (cdr z)) 
+	     (eval-one-exp ' ((lambda (x y . z)
+				(if (> x y)
+				    (car z)
+				    (cdr z))
 				(cadr z)) 5 4 'three 'two 'one))
 	     )])
       (display-results correct answers equal?)))
@@ -107,9 +107,9 @@
     (let ([correct '(
 		     10
 		     )]
-          [answers 
-            (list 
-	     (eval-one-exp 
+          [answers
+            (list
+	     (eval-one-exp
 	      '(let ([x (vector 7)])
 		 (if (< 4 5)
 		     (vector-set! x 0 (+ 3 (vector-ref x 0))))
@@ -141,59 +141,59 @@
 		     (13)
 		     (12 4 7)
 		     )]
-          [answers 
-            (list 
+          [answers
+            (list
 	     (eval-one-exp '(cond [(< 4 3) 8] [(< 2 3) 7] [else 8]))
 	     (eval-one-exp '(cond [(< 4 3) 8] [(> 2 3) 7] [else 6]))
 	     (eval-one-exp '(cond [(> 4 3) 8] [(< 2 3) 7] [else 6]))
 	     (eval-one-exp '(cond [else 8]))
-	     (eval-one-exp '(let ([a (vector 3)]) 
-			      (cond [(= (vector-ref a 0) 4) 5] 
-				    [(begin (vector-set! a 0 
-					      (+ 1 (vector-ref a 0))) 
-					    (= (vector-ref a 0) 4)) 6] 
+	     (eval-one-exp '(let ([a (vector 3)])
+			      (cond [(= (vector-ref a 0) 4) 5]
+				    [(begin (vector-set! a 0
+					      (+ 1 (vector-ref a 0)))
+					    (= (vector-ref a 0) 4)) 6]
 				    [else 10])))
 	     (eval-one-exp '(or #f #f 3 #f))
 	     (eval-one-exp '(or #f #f #f))
 	     (eval-one-exp '(or))
-	     (eval-one-exp '(let ([x 4] [y 5]) 
-			      (case (+ x y) 
-				[(1 3 5 7 9) 'odd] 
-				[(0 2 4 6 8) 'even] 
+	     (eval-one-exp '(let ([x 4] [y 5])
+			      (case (+ x y)
+				[(1 3 5 7 9) 'odd]
+				[(0 2 4 6 8) 'even]
 				[else 'out-of-range])))
-	     (eval-one-exp '(let ([x 4] [y 2]) 
-			      (case (+ x y) 
-				[(1 3 5 7 9) 'odd] 
-				[(0 2 4 6 8) 'even] 
+	     (eval-one-exp '(let ([x 4] [y 2])
+			      (case (+ x y)
+				[(1 3 5 7 9) 'odd]
+				[(0 2 4 6 8) 'even]
 				[else 'out-of-range])))
-	     (eval-one-exp '(let ([x 4] [y 6]) 
-			      (case (+ x y) 
-				[(1 3 5 7 9) 'odd] 
-				[(0 2 4 6 8) 'even] 
+	     (eval-one-exp '(let ([x 4] [y 6])
+			      (case (+ x y)
+				[(1 3 5 7 9) 'odd]
+				[(0 2 4 6 8) 'even]
 				[else 'out-of-range])))
-	     (eval-one-exp ' (let ((a (list 5))) 
-			       (if #t (begin (set-car! a 3) 
+	     (eval-one-exp ' (let ((a (list 5)))
+			       (if #t (begin (set-car! a 3)
 					     (set-car! a (+ 3 (car a))) a))))
-	     (eval-one-exp '(let ([a (list 3)]) 
-			      (while (< (car a) 100000) 
-				     (set-car! a (* (car a) (car a))) 
-				     (set-car! a (quotient (car a) 2))) 
+	     (eval-one-exp '(let ([a (list 3)])
+			      (while (< (car a) 100000)
+				     (set-car! a (* (car a) (car a)))
+				     (set-car! a (quotient (car a) 2)))
 			      a))
-	     (eval-one-exp '(let ([a (list 3)]) 
-			      (while (< (car a) 3) 
-				     (set-car! a (* (car a) (car a))) 
-				     (set-car! a (quotient (car a) 2))) 
+	     (eval-one-exp '(let ([a (list 3)])
+			      (while (< (car a) 3)
+				     (set-car! a (* (car a) (car a)))
+				     (set-car! a (quotient (car a) 2)))
 			      a))
              (eval-one-exp '(let ([f (lambda (x) (+ 2 (* 3 x)))])
 	       (f (let ([f (lambda (x) (f (* 5 x)))])
 		    (f 4)))))
-	     (eq? (void) 
-		  (eval-one-exp '(cond [(< 3 3) "this is false"] 
+	     (eq? (void)
+		  (eval-one-exp '(cond [(< 3 3) "this is false"]
 				       [(< 2 2) "this is false" ])))
 	     (eval-one-exp '(let* ([x 1] [y (+ x 1)])
                   (if (and (= x 1) (= y 2))
                       'correct
-                      'incorrect)))  
+                      'incorrect)))
 	     (eval-one-exp '
 	      (let ([a (list 4)])
 		(or (begin (set-car! a (+ 2 (car a))) #f)
@@ -217,7 +217,7 @@
 (define display-results
   (lambda (correct results test-procedure?)
      (display ": ")
-     (pretty-print 
+     (pretty-print
       (if (andmap test-procedure? correct results)
           'All-correct
           `(correct: ,correct yours: ,results)))))
@@ -281,15 +281,15 @@
 			  (andmap (lambda (y) (member y (remove (car x) syms)))
 				  (cadr x)))
 			obj))))))
-    
+
 (define graph-equal?
   (lambda (a b)
     (and
-     (graph? a) 
+     (graph? a)
      (graph? b)
      (let ([a-nodes (map car a)]
 	   [b-nodes (map car b)])
-       (and 
+       (and
 	(set-equals? a-nodes b-nodes)
 	    ; Now  See if the edges from each node are equivalent in the two graphs.
 	(let loop ([a-nodes a-nodes])
@@ -313,11 +313,11 @@
 
 
 (define g test-graph-equal)
-	   
-	  
-     
+
+
+
 ;;load the file
-(load "main.ss")
+; (load "main.ss")
 
 
 
@@ -325,24 +325,24 @@
 ;#by loading this file (and your solution) and typing (r)
 
 (define (run-all)
-  (display 'primitive-procedures) 
+  (display 'primitive-procedures)
   (test-primitive-procedures)
-  (display 'lambda-regression-tests) 
+  (display 'lambda-regression-tests)
   (test-lambda-regression-tests)
-  (display 'lambda-with-variable-args) 
+  (display 'lambda-with-variable-args)
   (test-lambda-with-variable-args)
-  (display 'syntactic-expansion) 
-  (test-syntactic-expansion)    
-  (display 'one-armed-if) 
+  (display 'syntactic-expansion)
+  (test-syntactic-expansion)
+  (display 'one-armed-if)
   (test-one-armed-if)
 
 )
 
 (define r run-all)
 ; (r)
-  (display 'primitive-procedures) 
-  (test-primitive-procedures)
-(display 'lambda-regression-tests) 
-  (test-lambda-regression-tests)
-  (display 'lambda-with-variable-args) 
-  (test-lambda-with-variable-args)
+;   (display 'primitive-procedures)
+;   (test-primitive-procedures)
+; (display 'lambda-regression-tests)
+;   (test-lambda-regression-tests)
+;   (display 'lambda-with-variable-args)
+;   (test-lambda-with-variable-args)

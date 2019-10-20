@@ -16,7 +16,13 @@
 
 (load-all)
 
-(define l load-all)
+(define run-test #t)
 
-; (load "tests.ss")
-; (r)
+(load "tests_14.ss")
+
+(if (not run-test) (r) (begin
+	(display 'lambda-regression-tests)
+	(test-lambda-regression-tests)
+	(display 'lambda-with-variable-args)
+	(test-lambda-with-variable-args)
+))
