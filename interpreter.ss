@@ -94,7 +94,7 @@
 		[prim-proc (op) (apply-prim-proc op args)]
 		; You will add other cases
 		[closure (syms arg bodies env)
-				(cond 
+				(cond
 					[(null? syms)
 						(run-closure bodies (extend-env (list arg) (list args) env))
 					]
@@ -211,15 +211,8 @@
 		[(cddar) (if (check-args args 1) (cddar (1th args)) (error-num-args prim-proc))]
 		[(cdadr) (if (check-args args 1) (cdadr (1th args)) (error-num-args prim-proc))]
 		[(cdddr) (if (check-args args 1) (cdddr (1th args)) (error-num-args prim-proc))]
-		[(apply) (begin
-			;(pretty-print (list (1th args) (2th args)))
-			(apply-proc (1th args) (2th args))
-		)]
-		[(map) (begin
-			;(pretty-print "Got Here 2")
-			;(apply map 
-			(my-map (cadar args) (cdr args))
-		)]
+		[(apply) (apply-proc (1th args) (2th args))]
+		[(map) (my-map (cadar args) (cdr args))]
 		[(=) (apply = args)]
 		[(<) (apply < args)]
 		[(>) (apply > args)]
@@ -234,12 +227,11 @@
 )
 
 (define (my-map proc args)
-	(begin ;(pretty-print "Got Here")
 	(let ([get-args (map car args)] [cut-args (map cdr args)])
 		(if (null? (caar args)) '()
 			(cons (apply-proc proc (get-args args)) (my-map proc (cut-args args)))
 		)
-	))
+	)
 )
 
 
