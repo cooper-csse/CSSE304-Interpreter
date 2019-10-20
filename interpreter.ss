@@ -52,12 +52,12 @@
 				[else (void)]
 			)
 		]
-		[lambda-exp (id body)
-			(closure id body env)
+		[lambda-exp (syms arg body)
+			(closure syms arg body env)
 		]
-		[lambda-n-exp (id body)
-			(void)
-		]
+		; [lambda-n-exp (id body)
+		; 	(void)
+		; ]
 		[app-exp (rator rands)
 			(let ([proc-value (eval-exp rator env)])
 				(if (eq? proc-value 'quote) (unparse-exp (1th rands))
@@ -93,10 +93,25 @@
 	(cases proc-val proc-value
 		[prim-proc (op) (apply-prim-proc op args)]
 		; You will add other cases
-		[closure (vars bodies env)
-			(if (= (length args) (length vars))
-				(run-closure bodies (extend-env vars args env))
-				(error 'apply-proc "wrong number of arguments to #<procedure>")
+		[closure (syms arg bodies env)
+				(cond 
+					[(null? syms)
+						(run-closure bodies (extend-env (list arg) (list args) env))
+					]
+					[(null? arg)
+						(if (= (length args) (length syms))
+							(run-closure bodies (extend-env syms args env))
+							(error 'apply-proc "wrong number of arguments to #<procedure>")
+						)
+						]
+					[else
+						;(let ([vars (cons arg syms)])
+							(run-closure bodies (extend-env
+								(append syms (list arg))
+								(set-args (append syms arg) args)
+							env))
+						;)
+					]
 			)
 		]
 		[else (error 'apply-proc
@@ -105,6 +120,17 @@
 		]
 	)
 )
+
+(define (set-args vars args)
+	(if (pair? vars)
+		(if (null? args)
+			(error 'apply-proc "not enough arguments to #<procedure>")
+			(cons (car args) (set-args (cdr vars) (cdr args)))
+		)
+		(list args)
+	)
+)
+
 
 (define (run-closure bodies env)
 	(if (null? (cdr bodies))
@@ -123,6 +149,7 @@
 								set-cdr! vector-set! display newline
 								car cdr caar cadr cdar cddr caaar caadr
 								cadar caddr cdaar cdadr cddar cdddr
+								apply map
 								= < > <= >=))
 
 (define init-env         ; for now, our initial global environment only contains
@@ -184,6 +211,15 @@
 		[(cddar) (if (check-args args 1) (cddar (1th args)) (error-num-args prim-proc))]
 		[(cdadr) (if (check-args args 1) (cdadr (1th args)) (error-num-args prim-proc))]
 		[(cdddr) (if (check-args args 1) (cdddr (1th args)) (error-num-args prim-proc))]
+		[(apply) (begin
+			;(pretty-print (list (1th args) (2th args)))
+			(apply-proc (1th args) (2th args))
+		)]
+		[(map) (begin
+			;(pretty-print "Got Here 2")
+			;(apply map 
+			(my-map (cadar args) (cdr args))
+		)]
 		[(=) (apply = args)]
 		[(<) (apply < args)]
 		[(>) (apply > args)]
@@ -191,10 +227,21 @@
 		[(>=) (apply >= args)]
 		[else (error 'apply-prim-proc
 			"Bad primitive procedure name: ~s"
-			prim-op)
+			prim-proc
+			)
 		]
 	)
 )
+
+(define (my-map proc args)
+	(begin ;(pretty-print "Got Here")
+	(let ([get-args (map car args)] [cut-args (map cdr args)])
+		(if (null? (caar args)) '()
+			(cons (apply-proc proc (get-args args)) (my-map proc (cut-args args)))
+		)
+	))
+)
+
 
 (define (check-args args . nums)
 	(let ([len (length args)])

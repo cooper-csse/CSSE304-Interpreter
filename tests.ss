@@ -304,7 +304,7 @@
 
 
 
-
+(load "main.ss")
 
 
 ;You can run the tests individually, or run them all
@@ -326,3 +326,4 @@
 )
 
 (define r run-all)
+(r)

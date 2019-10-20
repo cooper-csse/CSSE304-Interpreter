@@ -12,13 +12,15 @@
 		(id symbol?)
 	]
 	[lambda-exp
-		(id (list-of symbol?))
+		(syms (lambda (x) (or ((list-of symbol?) x) (null? x))))
+		(arg (lambda (x) (or (symbol? x) (null? x))))
 		(body (list-of expression?))
 	]
-	[lambda-n-exp
-		(id symbol?)
-		(body (list-of expression?))
-	]
+	; [lambda-n-exp
+	; 	(vars (list-of symbol?))
+	; 	(id symbol?)
+	; 	(body (list-of expression?))
+	; ]
 	[if-exp
 		(predicate expression?)
 		(consequent expression?)
@@ -74,7 +76,8 @@
 (define-datatype environment environment?
 	(empty-env-record)
 	(extended-env-record
-		(syms (list-of symbol?))
+		(syms (list-of (lambda (x) (or (symbol? x) (null? x)))))
+		; (syms (list-of symbol?))
 		(vals (list-of scheme-value?))
 		(env environment?)
 	)
@@ -89,7 +92,9 @@
 		(name symbol?)
 	]
 	[closure
-		(vars (list-of symbol?))
+		(syms (lambda (x) (or ((list-of symbol?) x) (null? x))))
+		;(syms (list-of symbol?))
+		(arg (lambda (x) (or (symbol? x) (null? x))))
 		(bodies (list-of expression?))
 		(env environment?)
 	]

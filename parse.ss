@@ -43,9 +43,14 @@
 							(cond
 								[(null? (cdr datum)) (eopl:error 'parse-exp "unexpected token <lambda>:" datum)]
 								[(null? (cddr datum)) (eopl:error 'parse-exp "missing arguments in <lambda>: ~s" datum)]
-								[(symbol? (2th datum)) (lambda-n-exp (2th datum) (map parse-exp (cddr datum)))]
+								[(symbol? (2th datum)) (lambda-exp '() (2th datum) (map parse-exp (cddr datum)))]
+								[(and (not (list? (2th datum))) (pair? (2th datum)))
+									(let ([args (separate-lambda-args (2th datum))])
+										(lambda-exp (car args) (cadr args) (map parse-exp (cddr datum)))
+									)
+								]
 								[(not (andmap symbol? (2th datum))) (eopl:error 'parse-exp "incorrect variable type in <lambda>: ~s" datum)]
-								[else (lambda-exp (2th datum) (map parse-exp (cddr datum)))]
+								[else (lambda-exp (2th datum) '() (map parse-exp (cddr datum)))]
 							)
 						]
 						[(eqv? (car datum) 'let)
@@ -143,8 +148,8 @@
 			(cases expression datum
 				[lit-exp (id) id]
 				[var-exp (id) id]
-				[lambda-exp (id body) (append (list 'lambda id) (map unparse-exp body)) ]
-				[lambda-n-exp (id body) (append (list 'lambda id) (map unparse-exp body)) ]
+				[lambda-exp (syms args body) (append (list 'lambda (append syms args)) (map unparse-exp body)) ]
+				; [lambda-n-exp (id body) (append (list 'lambda id) (map unparse-exp body)) ]
 				[if-exp (predicate consequent) (cons 'if (map unparse-exp (list predicate consequent)))]
 				[if-else-exp (predicate consequent alternative) (cons 'if (map unparse-exp (list predicate consequent alternative)))]
 				[let-exp (inner)
@@ -174,5 +179,14 @@
 				[app-exp (rator rand) (cons (unparse-exp rator) (map unparse-exp rand))]
 			)
 		)
+	)
+)
+
+(define (separate-lambda-args args)
+	(if (pair? (cdr args))
+		(let ([next (separate-lambda-args (cdr args))])
+			(cons (cons (car args) (car next)) (cdr next))
+		)
+		(list (list (car args)) (cdr args))
 	)
 )
