@@ -15,12 +15,12 @@
 )
 
 (load-all)
-
-(define run-test #t)
-
 (load "tests_14.ss")
 
-(if (not run-test) (r) (begin
+
+(define run-all #t) ; Modify this line to switch testing modes
+
+(if run-test (r) (begin
 	(display 'lambda-regression-tests)
 	(test-lambda-regression-tests)
 	(display 'lambda-with-variable-args)
