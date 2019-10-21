@@ -339,10 +339,3 @@
 )
 
 (define r run-all)
-; (r)
-;   (display 'primitive-procedures)
-;   (test-primitive-procedures)
-; (display 'lambda-regression-tests)
-;   (test-lambda-regression-tests)
-;   (display 'lambda-with-variable-args)
-;   (test-lambda-with-variable-args)

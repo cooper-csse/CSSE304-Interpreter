@@ -103,6 +103,14 @@
 							)
 
 						]
+						[(eqv? (car datum) 'if)
+							(cond
+								[(null? (cdr datum)) (eopl:error 'parse-exp "unexpected token <if>: ~s" datum)]
+								[(null? (cddr datum)) (eopl:error 'parse-exp "missing consequent in <if>: ~s" datum)]
+								[(null? (cdddr datum)) (if-exp (parse-exp (2th datum)) (parse-exp (3th datum)))]
+								[else (if-else-exp (parse-exp (2th datum)) (parse-exp (3th datum)) (parse-exp (4th datum)))]
+							)
+						]
 						[(eqv? (car datum) 'set!)
 							(cond
 								[(null? (cdr datum)) (eopl:error 'parse-exp "unexpected token <set!>: ~s" datum)]
@@ -110,14 +118,12 @@
 								[(not (null? (cdddr datum))) (eopl:error 'parse-exp "unexpected token in <set!>: ~s" datum)]
 								[else (set!-exp (2th datum) (parse-exp (3th datum)))]
 							)
-
 						]
-						[(eqv? (car datum) 'if)
+						[(eqv? (car datum) 'while)
 							(cond
-								[(null? (cdr datum)) (eopl:error 'parse-exp "unexpected token <if>: ~s" datum)]
-								[(null? (cddr datum)) (eopl:error 'parse-exp "missing consequent in <if>: ~s" datum)]
-								[(null? (cdddr datum)) (if-exp (parse-exp (2th datum)) (parse-exp (3th datum)))]
-								[else (if-else-exp (parse-exp (2th datum)) (parse-exp (3th datum)) (parse-exp (4th datum)))]
+								[(null? (cdr datum)) (eopl:error 'parse-exp "unexpected token <while>: ~s" datum)]
+								[(null? (cddr datum)) (eopl:error 'parse-exp "missing predicate in <while>: ~s" datum)]
+								[else (while-exp (parse-exp (2th datum)) (map parse-exp (cddr datum)))]
 							)
 						]
 						[else (app-exp (parse-exp (1th datum))
@@ -134,48 +140,48 @@
 
 (define unparse-exp
 	(let (
-		[let-helper (lambda (type vars vals body)
+		[let-helper (lambda (type vars vals bodies)
 			(append
 				(list type
 					(map (lambda (var val)
 						(list var (unparse-exp val))
 					) vars vals)
 				)
-				(map unparse-exp body)
+				(map unparse-exp bodies)
 			)
 		)])
 		(lambda (datum)
 			(cases expression datum
 				[lit-exp (id) id]
 				[var-exp (id) id]
-				[lambda-exp (syms args body) (append (list 'lambda (append syms args)) (map unparse-exp body)) ]
-				; [lambda-n-exp (id body) (append (list 'lambda id) (map unparse-exp body)) ]
+				[lambda-exp (syms args bodies) (append (list 'lambda (append syms args)) (map unparse-exp bodies)) ]
 				[if-exp (predicate consequent) (cons 'if (map unparse-exp (list predicate consequent)))]
 				[if-else-exp (predicate consequent alternative) (cons 'if (map unparse-exp (list predicate consequent alternative)))]
 				[let-exp (inner)
 					(cases let-type inner
-						[normal-let (vars vals body)
-							(let-helper 'let vars vals body)
+						[normal-let (vars vals bodies)
+							(let-helper 'let vars vals bodies)
 						]
-						[let*-let (vars vals body)
-							(let-helper 'let* vars vals body)
+						[let*-let (vars vals bodies)
+							(let-helper 'let* vars vals bodies)
 						]
-						[letrec-let (vars vals body)
-							(let-helper 'letrec vars vals body)
+						[letrec-let (vars vals bodies)
+							(let-helper 'letrec vars vals bodies)
 						]
-						[namedlet-let (name vars vals body)
+						[namedlet-let (name vars vals bodies)
 							(append
 								(list 'let name
 									(map (lambda (var val)
 										(list var (unparse-exp val))
 									) vars vals)
 								)
-								(map unparse-exp body)
+								(map unparse-exp bodies)
 							)
 						]
 					)
 				]
 				[set!-exp (var val) (list ('set! var (unparse-exp val)))]
+				[while-exp (predicate bodies) (append (list 'while (unparse-exp predicate)) (map unparse-exp bodies))]
 				[app-exp (rator rand) (cons (unparse-exp rator) (map unparse-exp rand))]
 			)
 		)

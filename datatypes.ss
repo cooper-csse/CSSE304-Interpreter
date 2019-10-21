@@ -14,7 +14,7 @@
 	[lambda-exp
 		(syms (lambda (x) (or ((list-of symbol?) x) (null? x))))
 		(arg (lambda (x) (or (symbol? x) (null? x))))
-		(body (list-of expression?))
+		(bodies (list-of expression?))
 	]
 	; [lambda-n-exp
 	; 	(vars (list-of symbol?))
@@ -37,6 +37,10 @@
 		(var symbol?)
 		(val expression?)
 	]
+	[while-exp
+		(predicate expression?)
+		(bodies (list-of expression?))
+	]
 	[app-exp
 		(rator expression?)
 		(rand (list-of expression?))
@@ -47,23 +51,23 @@
 	[normal-let
 		(vars (list-of symbol?))
 		(vals (list-of expression?))
-		(body (list-of expression?))
+		(bodies (list-of expression?))
 	]
 	[let*-let
 		(vars (list-of symbol?))
 		(vals (list-of expression?))
-		(body (list-of expression?))
+		(bodies (list-of expression?))
 	]
 	[letrec-let
 		(vars (list-of symbol?))
 		(vals (list-of expression?))
-		(body (list-of expression?))
+		(bodies (list-of expression?))
 	]
 	[namedlet-let
 		(name symbol?)
 		(vars (list-of symbol?))
 		(vals (list-of expression?))
-		(body (list-of expression?))
+		(bodies (list-of expression?))
 	]
 )
 

@@ -18,11 +18,12 @@
 (load "tests_14.ss")
 
 
-(define run-all #t) ; Modify this line to switch testing modes
+(define run-all
+	#t
+) ; Modify this line to switch testing modes
 
 (if run-all (r) (begin
-	(display 'lambda-regression-tests)
-	(test-lambda-regression-tests)
-	(display 'lambda-with-variable-args)
-	(test-lambda-with-variable-args)
+	(map pretty-print (reverse (list
+
+	)))
 ))
