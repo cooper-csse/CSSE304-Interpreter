@@ -151,7 +151,7 @@
 								set-cdr! vector-set! display newline
 								car cdr caar cadr cdar cddr caaar caadr
 								cadar caddr cdaar cdadr cddar cdddr
-								apply map quotient member and or
+								apply map quotient member
 								= < > <= >=))
 
 (define init-env         ; for now, our initial global environment only contains
@@ -221,8 +221,6 @@
 		)]
 		[(quotient) (quotient (1th args) (2th args))]
 		[(member) (member (1th args) (2th args))]
-		[(and) (andmap (lambda (x) x) args)]
-		[(or) (ormap (lambda (x) x) args)]
 		[(=) (apply = args)]
 		[(<) (apply < args)]
 		[(>) (apply > args)]
@@ -274,6 +272,7 @@
 				[else (app-exp rator (map syntax-expand rands))]
 			)
 		]
+		
 		[else (eopl:error 'syntax-expand "Bad: ~a" exp)]
 	)
 )
@@ -281,20 +280,32 @@
 (define (parse-expand rator rands)
 	(case (2th rator)
 		[(begin) (let-exp (normal-let '() '() rands))]
-		; [(or) (let loop ([rands rands])
-		; 	(cond
-		; 		[(null? rands) (lit-exp #f)]
-		; 		[(null? (cdr rands)) (if-else-exp (car rands) (car rands) (lit-exp #f))]
-		; 		[else (if-else-exp (car rands) (car rands) (loop (cdr rands)))]
-		; 	)
-		; )]
-		; [(and) (let loop ([rands rands])
-		; 	(cond
-		; 		[(null? rands) (lit-exp #t)]
-		; 		[(null? (cdr rands)) (if-else-exp (car rands) (lit-exp #t) (lit-exp #f))]
-		; 		[else (if-else-exp (car rands) (loop (cdr rands)) (lit-exp #f))]
-		; 	)
-		; )]
+		[(or) (let loop ([rands rands])
+		 	(cond
+		 		[(null? rands) (lit-exp #f)]
+				[(null? (cdr rands)) (let-exp (normal-let '(super-secret-hidden-variable-name) (list (car rands))
+					(list (if-else-exp
+						(var-exp 'super-secret-hidden-variable-name)
+						(var-exp 'super-secret-hidden-variable-name)
+						(lit-exp #f)
+					))
+				))]
+		 		[else (let-exp (normal-let '(super-secret-hidden-variable-name) (list (car rands))
+					(list (if-else-exp
+						(var-exp 'super-secret-hidden-variable-name)
+						(var-exp 'super-secret-hidden-variable-name)
+						(loop (cdr rands)))
+					)
+				))]
+		 	)
+		)]
+		[(and) (let loop ([rands rands])
+		 	(cond
+		 		[(null? rands) (lit-exp #t)]
+		 		[(null? (cdr rands)) (if-else-exp (car rands) (lit-exp #t) (lit-exp #f))]
+		 		[else (if-else-exp (car rands) (loop (cdr rands)) (lit-exp #f))]
+		 	)
+		)]
 		[(cond) (let loop ([rands rands])
 			(if (null? rands) (void) (let ([current (car rands)])
 				(cases expression current

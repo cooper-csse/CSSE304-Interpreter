@@ -15,15 +15,15 @@
 )
 
 (load-all)
-(load "tests_14.ss")
+
 
 
 (define run-all
 	#t
 ) ; Modify this line to switch testing modes
 
-(if run-all (r) (begin
-	(map pretty-print (reverse (list
-
-	)))
-))
+;(if run-all (r) (begin
+;	(map pretty-print (reverse (list
+;
+;	)))
+;))
