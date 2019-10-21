@@ -214,7 +214,11 @@
 		[(cdadr) (if (check-args args 1) (cdadr (1th args)) (error-num-args prim-proc))]
 		[(cdddr) (if (check-args args 1) (cdddr (1th args)) (error-num-args prim-proc))]
 		[(apply) (apply-proc (1th args) (2th args))]
-		[(map) (my-map (1th args) (cdr args))]
+		[(map) (let loop ([proc (1th args)] [args (cdr args)])
+			(if (null? (car args)) '()
+				(cons (apply-proc proc (map car args)) (loop proc (map cdr args)))
+			)
+		)]
 		[(quotient) (quotient (1th args) (2th args))]
 		[(member) (member (1th args) (2th args))]
 		[(and) (andmap (lambda (x) x) args)]
@@ -230,15 +234,6 @@
 		)]
 	)
 )
-
-(define (my-map proc args)
-	(if (null? (car args)) '()
-		(let ([get-args (map car args)] [cut-args (map cdr args)])
-			(cons (apply-proc proc get-args) (my-map proc cut-args))
-		)
-	)
-)
-
 
 (define (check-args args . nums)
 	(let ([len (length args)])
