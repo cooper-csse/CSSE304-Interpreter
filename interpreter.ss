@@ -49,6 +49,36 @@
 						env
 					))
 				]
+				[letrec-let (vars vals bodies)
+					(let*
+						(
+							[old-vals (map (lambda (item) (eval-exp item env)) vals)]
+							[new-env (extend-env vars old-vals env)]
+							; [new-vals (let loop ([old-vals old-vals])
+							; 	(if (null? old-vals) '()
+							; 		(cons (cases proc-val (car old-vals)
+							; 			[closure (syms arg bodies env)
+							; 				; (closure syms arg bodies new-env)
+							; 				(set-car! (cddddr (car old-vals)) new-env)
+							; 			]
+							; 			[else (car old-vals)]
+							; 		) (loop (cdr old-vals)))
+							; 	)
+							; )]
+						)
+						(let loop ([old-vals old-vals])
+							(if (null? old-vals) '()
+								(cons (cases proc-val (car old-vals)
+									[closure (syms arg bodies env)
+										(set-car! (cddddr (car old-vals)) new-env)
+									]
+									[else (void)]
+								) (loop (cdr old-vals)))
+							)
+						)
+						(eval-bodies bodies new-env)
+					)
+				]
 				[else (void)]
 			)
 		]
@@ -96,7 +126,6 @@
 (define (apply-proc proc-value args)
 	(cases proc-val proc-value
 		[prim-proc (op) (apply-prim-proc op args)]
-		; You will add other cases
 		[closure (syms arg bodies env)
 			(cond
 				[(null? syms)
@@ -151,7 +180,7 @@
 								set-cdr! vector-set! display newline
 								car cdr caar cadr cdar cddr caaar caadr
 								cadar caddr cdaar cdadr cddar cdddr
-								apply map quotient member
+								apply map quotient member append eqv? list-tail
 								= < > <= >=))
 
 (define init-env         ; for now, our initial global environment only contains
@@ -221,6 +250,9 @@
 		)]
 		[(quotient) (quotient (1th args) (2th args))]
 		[(member) (member (1th args) (2th args))]
+		[(append) (apply append args)]
+		[(eqv?) (apply eqv? args)]
+		[(list-tail) (if (check-args args 2) (list-tail (1th args) (2th args)) (error-num-args prim-proc))]
 		[(=) (apply = args)]
 		[(<) (apply < args)]
 		[(>) (apply > args)]
@@ -261,7 +293,15 @@
 						)
 					)
 				]
-				[else (void)]
+				[letrec-let (vars vals bodies)
+					(letrec-let vars (map syntax-expand vals) (map syntax-expand bodies))
+				]
+				[namedlet-let (name vars vals bodies)
+					(letrec-let (list name)
+						(list (lambda-exp vars '() (map syntax-expand bodies)))
+						(list (app-exp (var-exp name) (map syntax-expand vals)))
+					)
+				]
 			))
 		]
 		[lambda-exp (syms arg bodies) (lambda-exp syms arg (map syntax-expand bodies))]
@@ -272,7 +312,6 @@
 				[else (app-exp rator (map syntax-expand rands))]
 			)
 		]
-
 		[else (eopl:error 'syntax-expand "Bad: ~a" exp)]
 	)
 )

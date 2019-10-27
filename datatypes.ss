@@ -16,11 +16,6 @@
 		(arg (lambda (x) (or (symbol? x) (null? x))))
 		(bodies (list-of expression?))
 	]
-	; [lambda-n-exp
-	; 	(vars (list-of symbol?))
-	; 	(id symbol?)
-	; 	(body (list-of expression?))
-	; ]
 	[if-exp
 		(predicate expression?)
 		(consequent expression?)
@@ -97,7 +92,6 @@
 	]
 	[closure
 		(syms (lambda (x) (or ((list-of symbol?) x) (null? x))))
-		;(syms (list-of symbol?))
 		(arg (lambda (x) (or (symbol? x) (null? x))))
 		(bodies (list-of expression?))
 		(env environment?)

@@ -16,17 +16,37 @@
 
 (load-all)
 
-(define run-13 #f)
-(define run-14 #f)
+(define run-13 #t)
+(define run-14 #t)
 (define run-16 #t)
 (define run-17 #f)
 (define test-mode #f)
-(define run-tests #t)
+(define run-tests #f)
 
 (if run-tests
 	(if test-mode (begin
 		(map pretty-print (reverse (list
-			(display "test")
+		; (unparse-exp (syntax-expand (parse-exp '
+	    ;   (let ([n 5])
+		; (let f ([n n] [acc 1])
+		;   (if (= n 0)
+		;       acc
+		;       (f (sub1 n) (* acc n))))))
+		; ))
+		(eval-one-exp '
+			(let ([n 5])
+				(letrec
+					(
+						[f (lambda (n acc)
+							(if (= n 0) acc
+								(f (sub1 n) (* acc n))
+							)
+						)]
+					)
+					(f n 1)
+				)
+			)
+		)
 		)))
 	) (begin
 		(if run-13 (begin (newline) (pretty-print 'assignment_13) (load "tests/tests_13.ss") (r)))
