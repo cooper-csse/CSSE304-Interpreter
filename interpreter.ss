@@ -272,7 +272,7 @@
 				[else (app-exp rator (map syntax-expand rands))]
 			)
 		]
-		
+
 		[else (eopl:error 'syntax-expand "Bad: ~a" exp)]
 	)
 )
@@ -294,8 +294,8 @@
 					(list (if-else-exp
 						(var-exp 'super-secret-hidden-variable-name)
 						(var-exp 'super-secret-hidden-variable-name)
-						(loop (cdr rands)))
-					)
+						(loop (cdr rands))
+					))
 				))]
 		 	)
 		)]

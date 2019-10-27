@@ -317,7 +317,7 @@
 
 
 ;;load the file
- (load "main.ss")
+;  (load "main.ss")
 
 
 
@@ -339,4 +339,4 @@
 )
 
 (define r run-all)
-(run-all)
+; (run-all)

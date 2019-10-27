@@ -16,14 +16,22 @@
 
 (load-all)
 
+(define run-13 #f)
+(define run-14 #f)
+(define run-16 #t)
+(define run-17 #f)
+(define test-mode #f)
+(define run-tests #t)
 
-
-(define run-all
-	#t
-) ; Modify this line to switch testing modes
-
-;(if run-all (r) (begin
-;	(map pretty-print (reverse (list
-;
-;	)))
-;))
+(if run-tests
+	(if test-mode (begin
+		(map pretty-print (reverse (list
+			(display "test")
+		)))
+	) (begin
+		(if run-13 (begin (newline) (pretty-print 'assignment_13) (load "tests/tests_13.ss") (r)))
+		(if run-14 (begin (newline) (pretty-print 'assignment_14) (load "tests/tests_14.ss") (r)))
+		(if run-16 (begin (newline) (pretty-print 'assignment_16) (load "tests/tests_16.ss") (r)))
+		(if run-17 (begin (newline) (pretty-print 'assignment_17) (load "tests/tests_17.ss") (r)))
+	))
+)
