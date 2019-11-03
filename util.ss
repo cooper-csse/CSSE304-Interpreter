@@ -15,3 +15,5 @@
 (define 2th cadr)
 (define 3th caddr)
 (define 4th cadddr)
+(define (5th ls) (car (cddddr ls)))
+(define (6th ls) (cadr (cddddr ls)))

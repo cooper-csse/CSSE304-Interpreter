@@ -3,6 +3,8 @@
 ; 2019-10-14
 ; CSSE304-03
 
+; Exam 2 code found starting on line 131
+
 (load "util.ss")
 
 (define parse-exp
@@ -126,6 +128,16 @@
 								[else (while-exp (parse-exp (2th datum)) (map parse-exp (cddr datum)))]
 							)
 						]
+						[(eqv? (car datum) 'for)							; Exam 2 Interpreter Code
+							(cond
+								; [(null? (cdr datum)) (eopl:error 'parse-exp "unexpected token <for>: ~s" datum)]
+								; [(or (null? (cddr datum)) (null? (cdddr datum))) (eopl:error 'parse-exp "missing start condition in <for>: ~s" datum)]
+								; [(not (eqv? (cddr datum) 'from)) (eopl:error 'parse-exp "missing token <from> in <for>: ~s" datum)]
+								; [(or (null? (cddddr datum)) (null? (cdr (cddddr datum)))) (eopl:error 'parse-exp "missing start condition in <for>: ~s" datum)]
+								; [(not (eqv? (cddddr datum) 'to)) (eopl:error 'parse-exp "missing token <to> in <for>: ~s" datum)]
+								[else (for-exp (2th datum) (parse-exp (4th datum)) (parse-exp (6th datum)) (map parse-exp (cddr (cddddr datum))))]
+							)
+						]
 						[else (app-exp (parse-exp (1th datum))
 							(map parse-exp (cdr datum))
 						)]
@@ -183,6 +195,7 @@
 				[set!-exp (var val) (list ('set! var (unparse-exp val)))]
 				[while-exp (predicate bodies) (append (list 'while (unparse-exp predicate)) (map unparse-exp bodies))]
 				[app-exp (rator rand) (cons (unparse-exp rator) (map unparse-exp rand))]
+				[else (display "test")]
 			)
 		)
 	)

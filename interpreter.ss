@@ -3,6 +3,8 @@
 ; 2019-10-14
 ; CSSE304-03
 
+; Exam 2 code found starting on line 313
+
 ; top-level-eval evaluates a form in the global environment
 
 (define top-level-eval
@@ -181,6 +183,7 @@
 								car cdr caar cadr cdar cddr caaar caadr
 								cadar caddr cdaar cdadr cddar cdddr
 								apply map quotient member append eqv? list-tail
+								even?
 								= < > <= >=))
 
 (define init-env         ; for now, our initial global environment only contains
@@ -253,6 +256,7 @@
 		[(append) (apply append args)]
 		[(eqv?) (apply eqv? args)]
 		[(list-tail) (if (check-args args 2) (list-tail (1th args) (2th args)) (error-num-args prim-proc))]
+		[(even?) (if (check-args args 1) (even? (1th args)) (error-num-args prim-proc))]
 		[(=) (apply = args)]
 		[(<) (apply < args)]
 		[(>) (apply > args)]
@@ -306,6 +310,18 @@
 		]
 		[lambda-exp (syms arg bodies) (lambda-exp syms arg (map syntax-expand bodies))]
 		[while-exp (predicate bodies) (while-exp (syntax-expand predicate) (map syntax-expand bodies))]
+		[for-exp (var start end bodies)							; Exam 2 Interpreter Code
+			(syntax-expand (let-exp (namedlet-let 'for-loop (list var 'loop-end) (list start end)
+				(list (if-exp (app-exp (var-exp '<=) (list (var-exp var) (var-exp 'loop-end)))
+					(app-exp (var-exp 'begin) (append bodies (list
+						(app-exp (var-exp 'for-loop) (list
+							(app-exp (var-exp 'add1) (list (var-exp var)))
+							(var-exp 'loop-end)
+						))
+					)))
+				))
+			)))
+		]
 		[app-exp (rator rands)
 			(cases expression rator
 				[var-exp (id) (parse-expand rator (map syntax-expand rands))]
