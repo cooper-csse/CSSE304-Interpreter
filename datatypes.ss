@@ -3,8 +3,6 @@
 ; 2019-10-14
 ; CSSE304-03
 
-; Exam 2 code found starting on line 41
-
 (load "util.ss")
 
 (define-datatype expression expression?
@@ -38,7 +36,7 @@
 		(predicate expression?)
 		(bodies (list-of expression?))
 	]
-	[for-exp							; Exam 2 Interpreter Code
+	[for-exp
 		(var symbol?)
 		(start expression?)
 		(end expression?)

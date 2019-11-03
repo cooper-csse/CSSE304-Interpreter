@@ -3,8 +3,6 @@
 ; 2019-10-14
 ; CSSE304-03
 
-; Exam 2 code found starting on line 131
-
 (load "util.ss")
 
 (define parse-exp
@@ -128,7 +126,7 @@
 								[else (while-exp (parse-exp (2th datum)) (map parse-exp (cddr datum)))]
 							)
 						]
-						[(eqv? (car datum) 'for)							; Exam 2 Interpreter Code
+						[(eqv? (car datum) 'for)
 							(cond
 								; [(null? (cdr datum)) (eopl:error 'parse-exp "unexpected token <for>: ~s" datum)]
 								; [(or (null? (cddr datum)) (null? (cdddr datum))) (eopl:error 'parse-exp "missing start condition in <for>: ~s" datum)]

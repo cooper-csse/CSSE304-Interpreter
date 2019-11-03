@@ -3,10 +3,7 @@
 ; 2019-10-14
 ; CSSE304-03
 
-; Exam 2 code found starting on line 313
-
 ; top-level-eval evaluates a form in the global environment
-
 (define top-level-eval
 	(lambda (form)
 		; later we may add things that are not expressions.
@@ -15,7 +12,6 @@
 )
 
 ; eval-exp is the main component of the interpreter
-
 (define (eval-exp exp env)
 	(cases expression exp
 		[lit-exp (datum) datum]
@@ -56,17 +52,6 @@
 						(
 							[old-vals (map (lambda (item) (eval-exp item env)) vals)]
 							[new-env (extend-env vars old-vals env)]
-							; [new-vals (let loop ([old-vals old-vals])
-							; 	(if (null? old-vals) '()
-							; 		(cons (cases proc-val (car old-vals)
-							; 			[closure (syms arg bodies env)
-							; 				; (closure syms arg bodies new-env)
-							; 				(set-car! (cddddr (car old-vals)) new-env)
-							; 			]
-							; 			[else (car old-vals)]
-							; 		) (loop (cdr old-vals)))
-							; 	)
-							; )]
 						)
 						(let loop ([old-vals old-vals])
 							(if (null? old-vals) '()
@@ -106,7 +91,6 @@
 )
 
 ; evaluate the list of operands, putting results into a list
-
 (define (eval-rands rands env)
 	(map (lambda (item) (eval-exp item env)) rands)
 )
@@ -124,7 +108,6 @@
 ;  Apply a procedure to its arguments.
 ;  At this point, we only have primitive procedures.
 ;  User-defined procedures will be added later.
-
 (define (apply-proc proc-value args)
 	(cases proc-val proc-value
 		[prim-proc (op) (apply-prim-proc op args)]
@@ -196,7 +179,6 @@
 
 ; Usually an interpreter must define each
 ; built-in procedure individually.  We are "cheating" a little bit.
-
 (define (apply-prim-proc prim-proc args)
 	(case prim-proc
 		[(+) (apply + args)]
@@ -310,7 +292,7 @@
 		]
 		[lambda-exp (syms arg bodies) (lambda-exp syms arg (map syntax-expand bodies))]
 		[while-exp (predicate bodies) (while-exp (syntax-expand predicate) (map syntax-expand bodies))]
-		[for-exp (var start end bodies)							; Exam 2 Interpreter Code
+		[for-exp (var start end bodies)
 			(syntax-expand (let-exp (namedlet-let 'for-loop (list var 'loop-end) (list start end)
 				(list (if-exp (app-exp (var-exp '<=) (list (var-exp var) (var-exp 'loop-end)))
 					(app-exp (var-exp 'begin) (append bodies (list
@@ -386,7 +368,6 @@
 				(if (null? rands) (void)
 					(cases expression (car rands)
 						[app-exp (predicate consequent)
-							; (pretty-print (caddr predicate))
 							(letrec
 								([get-id (lambda (exp)
 									(cases expression exp
@@ -419,7 +400,8 @@
 	)
 )
 
-(define (rep)      ; "read-eval-print" loop.
+; "read-eval-print" loop.
+(define (rep)
 	(display "--> ")
 	;; notice that we don't save changes to the environment...
 	(let ([answer (top-level-eval (parse-exp (read)))])
