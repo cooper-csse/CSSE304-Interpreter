@@ -36,7 +36,7 @@
 		(lambda (datum)
 			(cond
 				[(symbol? datum) (var-exp datum)]
-				[(and (not (list? datum)) (pair? datum)) (eopl:error 'parse-exp "improper list in datum:" datum)]
+				[(and (not (list? datum)) (pair? datum)) (lit-exp datum)]
 				[(pair? datum)
 					(cond
 						[(eqv? (1th datum) 'lambda)
@@ -53,7 +53,7 @@
 								[else (lambda-exp (2th datum) '() (map parse-exp (cddr datum)))]
 							)
 						]
-						[(eqv? (car datum) 'let)
+						[(eqv? (1th datum) 'let)
 							(cond
 								[(null? (cdr datum)) (eopl:error 'parse-exp "unexpected token <let>:" datum)]
 								[(null? (cddr datum)) (eopl:error 'parse-exp "missing arguments in <let>: ~s" datum)]
@@ -78,7 +78,7 @@
 							)
 
 						]
-						[(eqv? (car datum) 'let*)
+						[(eqv? (1th datum) 'let*)
 							(cond
 								[(null? (cdr datum)) (eopl:error 'parse-exp "unexpected token <let*>:" datum)]
 								[(null? (cddr datum)) (eopl:error 'parse-exp "missing body in <let*>: ~s" datum)]
@@ -90,7 +90,7 @@
 							)
 
 						]
-						[(eqv? (car datum) 'letrec)
+						[(eqv? (1th datum) 'letrec)
 							(cond
 								[(null? (cdr datum)) (eopl:error 'parse-exp "unexpected token <letrec>: ~s" datum)]
 								[(null? (cddr datum)) (eopl:error 'parse-exp "missing body in <letrec>: ~s" datum)]
@@ -103,7 +103,7 @@
 							)
 
 						]
-						[(eqv? (car datum) 'if)
+						[(eqv? (1th datum) 'if)
 							(cond
 								[(null? (cdr datum)) (eopl:error 'parse-exp "unexpected token <if>: ~s" datum)]
 								[(null? (cddr datum)) (eopl:error 'parse-exp "missing consequent in <if>: ~s" datum)]
@@ -111,7 +111,15 @@
 								[else (if-else-exp (parse-exp (2th datum)) (parse-exp (3th datum)) (parse-exp (4th datum)))]
 							)
 						]
-						[(eqv? (car datum) 'set!)
+						[(eqv? (1th datum) 'define)
+							(cond
+								[(null? (cdr datum)) (eopl:error 'parse-exp "unexpected token <define>: ~s" datum)]
+								[(null? (cddr datum)) (eopl:error 'parse-exp "missing value in <define>: ~s" datum)]
+								[(not (null? (cdddr datum))) (eopl:error 'parse-exp "unexpected token in <define>: ~s" datum)]
+								[else (define-exp (2th datum) (parse-exp (3th datum)))]
+							)
+						]
+						[(eqv? (1th datum) 'set!)
 							(cond
 								[(null? (cdr datum)) (eopl:error 'parse-exp "unexpected token <set!>: ~s" datum)]
 								[(null? (cddr datum)) (eopl:error 'parse-exp "missing value in <set!>: ~s" datum)]
@@ -119,14 +127,14 @@
 								[else (set!-exp (2th datum) (parse-exp (3th datum)))]
 							)
 						]
-						[(eqv? (car datum) 'while)
+						[(eqv? (1th datum) 'while)
 							(cond
 								[(null? (cdr datum)) (eopl:error 'parse-exp "unexpected token <while>: ~s" datum)]
 								[(null? (cddr datum)) (eopl:error 'parse-exp "missing predicate in <while>: ~s" datum)]
 								[else (while-exp (parse-exp (2th datum)) (map parse-exp (cddr datum)))]
 							)
 						]
-						[(eqv? (car datum) 'for)
+						[(eqv? (1th datum) 'for)
 							(cond
 								; [(null? (cdr datum)) (eopl:error 'parse-exp "unexpected token <for>: ~s" datum)]
 								; [(or (null? (cddr datum)) (null? (cdddr datum))) (eopl:error 'parse-exp "missing start condition in <for>: ~s" datum)]

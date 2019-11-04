@@ -7,7 +7,7 @@
 (define top-level-eval
 	(lambda (form)
 		; later we may add things that are not expressions.
-		(eval-exp form init-env)
+		(eval-exp form global-env)
 	)
 )
 
@@ -17,9 +17,9 @@
 		[lit-exp (datum) datum]
 		[var-exp (id)
 			(if (eq? id 'quote) 'quote
-				(apply-env env id; look up its value.
-					(lambda (x) x) ; procedure to call if id is in the environment
-					(lambda () (eopl:error 'apply-env ; procedure to call if id not in env
+				(apply-env env id
+					cell-ref
+					(lambda () (eopl:error 'apply-env
 						"variable not found in environment: ~s"
 						id
 					))
@@ -77,6 +77,21 @@
 				(if (eval-exp predicate env)
 					(begin (eval-bodies bodies env) (loop))
 				)
+			)
+		]
+		[define-exp (var val)
+			(let ([eval-val (eval-exp val env)])
+				(set-car! (cdr global-env) (cons var (cadr global-env)))
+				(set-car! (cddr global-env) (cons (cell eval-val) (caddr global-env)))
+			)
+		]
+		[set!-exp (var val)
+			(apply-env env var
+				(lambda (c) (cell-set! c (eval-exp val env)))
+				(lambda () (eopl:error 'apply-env
+					"variable not found in environment: ~s"
+					var
+				))
 			)
 		]
 		[app-exp (rator rands)
@@ -147,7 +162,6 @@
 	)
 )
 
-
 (define (run-closure bodies env)
 	(if (null? (cdr bodies))
 		(eval-exp (car bodies) env)
@@ -155,25 +169,6 @@
 			(eval-exp (car bodies) env)
 			(run-closure (cdr bodies) env)
 		)
-	)
-)
-
-(define *prim-proc-names* '(+ - * / add1 sub1 zero? not cons list null? assq eq?
-								equal? atom? length list->vector list? pair?
-								procedure? vector->list vector make-vector
-								vector-ref vector? number? symbol? set-car!
-								set-cdr! vector-set! display newline
-								car cdr caar cadr cdar cddr caaar caadr
-								cadar caddr cdaar cdadr cddar cdddr
-								apply map quotient member append eqv? list-tail
-								even?
-								= < > <= >=))
-
-(define init-env         ; for now, our initial global environment only contains
-	(extend-env            ; procedure names.  Recall that an environment associates
-		*prim-proc-names*   ;  a value (not an expression) with an identifier.
-		(map prim-proc *prim-proc-names*)
-		(empty-env)
 	)
 )
 
@@ -304,6 +299,8 @@
 				))
 			)))
 		]
+		[define-exp (var val) (define-exp var (syntax-expand val))]
+		[set!-exp (var val) (set!-exp var (syntax-expand val))]
 		[app-exp (rator rands)
 			(cases expression rator
 				[var-exp (id) (parse-expand rator (map syntax-expand rands))]

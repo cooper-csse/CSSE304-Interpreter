@@ -28,6 +28,10 @@
 	[let-exp
 		(inner let-type?)
 	]
+	[define-exp
+		(var symbol?)
+		(val expression?)
+	]
 	[set!-exp
 		(var symbol?)
 		(val expression?)
@@ -78,12 +82,16 @@
 	(lambda (x) #t)
 )
 
+(define (cell value) (cons 'cell value))
+(define cell? pair?)
+(define cell-ref cdr)
+(define cell-set! set-cdr!)
+
 (define-datatype environment environment?
 	(empty-env-record)
 	(extended-env-record
 		(syms (list-of (lambda (x) (or (symbol? x) (null? x)))))
-		; (syms (list-of symbol?))
-		(vals (list-of scheme-value?))
+		(vals (list-of cell?))
 		(env environment?)
 	)
 )
@@ -91,7 +99,6 @@
 
 ; datatype for procedures.  At first there is only one
 ; kind of procedure, but more kinds will be added later.
-
 (define-datatype proc-val proc-val?
 	[prim-proc
 		(name symbol?)
