@@ -11,7 +11,16 @@
 
 (define extend-env
 	(lambda (syms vals env)
-		(extended-env-record syms (map cell vals) env)
+		(extended-env-record syms
+			(map (lambda (s v)
+				(if (symbol? s) (cell v)
+					(cases parameter s
+						[val-arg (sym) (cell v)]
+						[ref-arg (sym) (cell v)]
+					)
+				)
+			) syms vals)
+		env)
 	)
 )
 
@@ -44,7 +53,7 @@
 				(fail)
 			]
 			[extended-env-record (syms vals env)
-				(let ((pos (list-find-position sym syms)))
+				(let ((pos (list-find-position sym (map cadr syms))))
 					(if (number? pos)
 						(succeed (list-ref vals pos))
 						(apply-env env sym succeed fail)
@@ -69,7 +78,7 @@
 
 (define (init-env)         ; for now, our initial global environment only contains
 	(extend-env            ; procedure names.  Recall that an environment associates
-		*prim-proc-names*   ;  a value (not an expression) with an identifier.
+		(map val-arg *prim-proc-names*)   ;  a value (not an expression) with an identifier.
 		(map prim-proc *prim-proc-names*)
 		(empty-env)
 	)

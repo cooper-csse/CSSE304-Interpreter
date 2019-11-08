@@ -12,7 +12,7 @@
 				[(not (list? set)) (eopl:error 'parse-exp "improper list in let:" set)]
 				[(or (pair? set) (null? set))
 					(map (lambda (x)
-						(if (symbol? (car x)) (car x)
+						(if (symbol? (car x)) (make-parameter (car x))
 							(eopl:error 'parse-exp "variable must be a symbol:" set)
 						)
 					) set)
@@ -43,14 +43,16 @@
 							(cond
 								[(null? (cdr datum)) (eopl:error 'parse-exp "unexpected token <lambda>:" datum)]
 								[(null? (cddr datum)) (eopl:error 'parse-exp "missing arguments in <lambda>: ~s" datum)]
-								[(symbol? (2th datum)) (lambda-exp '() (2th datum) (map parse-exp (cddr datum)))]
+								[(symbol? (2th datum)) (lambda-exp '() (make-parameter (2th datum)) (map parse-exp (cddr datum)))]
 								[(and (not (list? (2th datum))) (pair? (2th datum)))
-									(let ([args (separate-lambda-args (2th datum))])
+									(let ([args (separate-parameters (2th datum))])
 										(lambda-exp (car args) (cadr args) (map parse-exp (cddr datum)))
 									)
 								]
 								[(not (andmap symbol? (2th datum))) (eopl:error 'parse-exp "incorrect variable type in <lambda>: ~s" datum)]
-								[else (lambda-exp (2th datum) '() (map parse-exp (cddr datum)))]
+								[else (lambda-exp
+									(map make-parameter (2th datum))
+								'() (map parse-exp (cddr datum)))]
 							)
 						]
 						[(eqv? (1th datum) 'let)
@@ -207,11 +209,17 @@
 	)
 )
 
-(define (separate-lambda-args args)
+(define (separate-parameters args)
 	(if (pair? (cdr args))
-		(let ([next (separate-lambda-args (cdr args))])
-			(cons (cons (car args) (car next)) (cdr next))
+		(let ([next (separate-parameters (cdr args))])
+			(cons (cons
+				(if (is-ref? (car args))
+					(ref-arg (cadr args))
+					(val-arg (car args))
+				)
+				(car next)
+			) (cdr next))
 		)
-		(list (list (car args)) (cdr args))
+		(list (list (val-arg (car args))) (val-arg (cdr args)))
 	)
 )

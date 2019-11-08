@@ -10,6 +10,23 @@
 	)
 )
 
+(define (is-ref? datum)
+	(cond
+		[(symbol? datum) #f]
+		[(null? datum) (eopl:error 'parse-exp "unexpected token: ~s" datum)]
+		[(null? (cdr datum)) (eopl:error 'parse-exp "unexpected parentheses around argument: ~s" datum)]
+		[(not (eq? (car datum) 'ref)) (eopl:error 'parse-exp "missing token <ref>: ~s" datum)]
+		[else #t]
+	)
+)
+
+(define (make-parameter datum)
+	(if (is-ref? datum)
+		(ref-arg (2th datum))
+		(val-arg datum)
+	)
+)
+
 ; Ease of access for getting first, second, third... in a list
 (define 1th car)
 (define 2th cadr)

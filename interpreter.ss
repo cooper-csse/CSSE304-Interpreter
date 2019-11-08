@@ -81,7 +81,7 @@
 		]
 		[define-exp (var val)
 			(let ([eval-val (eval-exp val env)])
-				(set-car! (cdr global-env) (cons var (cadr global-env)))
+				(set-car! (cdr global-env) (cons (val-arg var) (cadr global-env)))
 				(set-car! (cddr global-env) (cons (cell eval-val) (caddr global-env)))
 			)
 		]
@@ -138,10 +138,13 @@
 					)
 				]
 				[else
+					(pretty-print syms)
+					(pretty-print arg)
 					(run-closure bodies (extend-env
 						(append syms (list arg))
-						(set-args (append syms arg) args)
+						(set-args (append syms (list arg)) args)
 					env))
+					(pretty-print 'test)
 				]
 			)
 		]
@@ -153,9 +156,12 @@
 )
 
 (define (set-args vars args)
+	(newline)
+	(pretty-print (length args))
+	(newline)
 	(if (pair? vars)
 		(if (null? args)
-			(error 'apply-proc "not enough arguments to #<procedure>")
+			(error 'set-args "not enough arguments to #<procedure>")
 			(cons (car args) (set-args (cdr vars) (cdr args)))
 		)
 		(list args)
@@ -278,7 +284,7 @@
 					(letrec-let vars (map syntax-expand vals) (map syntax-expand bodies))
 				]
 				[namedlet-let (name vars vals bodies)
-					(letrec-let (list name)
+					(letrec-let (list (make-parameter name))
 						(list (lambda-exp vars '() (map syntax-expand bodies)))
 						(list (app-exp (var-exp name) (map syntax-expand vals)))
 					)
@@ -317,14 +323,14 @@
 		[(or) (let loop ([rands rands])
 		 	(cond
 		 		[(null? rands) (lit-exp #f)]
-				[(null? (cdr rands)) (let-exp (normal-let '(super-secret-hidden-variable-name) (list (car rands))
+				[(null? (cdr rands)) (let-exp (normal-let (list (make-parameter 'super-secret-hidden-variable-name)) (list (car rands))
 					(list (if-else-exp
 						(var-exp 'super-secret-hidden-variable-name)
 						(var-exp 'super-secret-hidden-variable-name)
 						(lit-exp #f)
 					))
 				))]
-		 		[else (let-exp (normal-let '(super-secret-hidden-variable-name) (list (car rands))
+		 		[else (let-exp (normal-let (list (make-parameter 'super-secret-hidden-variable-name)) (list (car rands))
 					(list (if-else-exp
 						(var-exp 'super-secret-hidden-variable-name)
 						(var-exp 'super-secret-hidden-variable-name)

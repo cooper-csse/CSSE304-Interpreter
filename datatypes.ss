@@ -5,6 +5,11 @@
 
 (load "util.ss")
 
+(define-datatype parameter parameter?
+	[val-arg (sym symbol?)]
+	[ref-arg (sym symbol?)]
+)
+
 (define-datatype expression expression?
 	[lit-exp
 		(id lit?)]
@@ -12,8 +17,8 @@
 		(id symbol?)
 	]
 	[lambda-exp
-		(syms (lambda (x) (or ((list-of symbol?) x) (null? x))))
-		(arg (lambda (x) (or (symbol? x) (null? x))))
+		(syms (lambda (x) (or ((list-of parameter?) x) (null? x))))
+		(arg (lambda (x) (or (parameter? x) (null? x))))
 		(bodies (list-of expression?))
 	]
 	[if-exp
@@ -54,23 +59,23 @@
 
 (define-datatype let-type let-type?
 	[normal-let
-		(vars (list-of symbol?))
+		(vars (list-of parameter?))
 		(vals (list-of expression?))
 		(bodies (list-of expression?))
 	]
 	[let*-let
-		(vars (list-of symbol?))
+		(vars (list-of parameter?))
 		(vals (list-of expression?))
 		(bodies (list-of expression?))
 	]
 	[letrec-let
-		(vars (list-of symbol?))
+		(vars (list-of parameter?))
 		(vals (list-of expression?))
 		(bodies (list-of expression?))
 	]
 	[namedlet-let
 		(name symbol?)
-		(vars (list-of symbol?))
+		(vars (list-of parameter?))
 		(vals (list-of expression?))
 		(bodies (list-of expression?))
 	]
@@ -90,7 +95,8 @@
 (define-datatype environment environment?
 	(empty-env-record)
 	(extended-env-record
-		(syms (list-of (lambda (x) (or (symbol? x) (null? x)))))
+		;(syms (list-of (lambda (x) (or (symbol? x) (null? x)))))
+		(syms (lambda (x) (or ((list-of parameter?) x) (null? x))))
 		(vals (list-of cell?))
 		(env environment?)
 	)
@@ -104,8 +110,8 @@
 		(name symbol?)
 	]
 	[closure
-		(syms (lambda (x) (or ((list-of symbol?) x) (null? x))))
-		(arg (lambda (x) (or (symbol? x) (null? x))))
+		(syms (lambda (x) (or ((list-of parameter?) x) (null? x))))
+		(arg (lambda (x) (or (parameter? x) (null? x))))
 		(bodies (list-of expression?))
 		(env environment?)
 	]
