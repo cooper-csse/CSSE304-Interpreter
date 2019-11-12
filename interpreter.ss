@@ -7,14 +7,14 @@
 (define top-level-eval
 	(lambda (form)
 		; later we may add things that are not expressions.
-		(eval-exp form global-env)
+		(eval-exp form global-env (init-k))
 	)
 )
 
 ; eval-exp is the main component of the interpreter
-(define (eval-exp exp env)
+(define (eval-exp exp env k)
 	(cases expression exp
-		[lit-exp (datum) datum]
+		[lit-exp (datum) (apply-k k datum)]
 		[var-exp (id)
 			(if (eq? id 'quote) 'quote
 				(apply-env env id
@@ -27,15 +27,15 @@
 			)
 		]
 		[if-exp (predicate consequent)
-			(if (eval-exp predicate env)
-				(eval-exp consequent env)
+			(if (eval-exp predicate env k)
+				(eval-exp consequent env k)
 				(void)
 			)
 		]
 		[if-else-exp (predicate consequent alternative)
-			(if (eval-exp predicate env)
-				(eval-exp consequent env)
-				(eval-exp alternative env)
+			(if (eval-exp predicate env k)
+				(eval-exp consequent env k)
+				(eval-exp alternative env k)
 			)
 		]
 		[let-exp (inner)
@@ -43,14 +43,14 @@
 				[normal-let (vars vals bodies)
 					(eval-bodies bodies (extend-env
 						vars
-						(map (lambda (item) (eval-exp item env)) vals)
+						(map (lambda (item) (eval-exp item env k)) vals)
 						env
-					))
+					) k)
 				]
 				[letrec-let (vars vals bodies)
 					(let*
 						(
-							[old-vals (map (lambda (item) (eval-exp item env)) vals)]
+							[old-vals (map (lambda (item) (eval-exp item env k)) vals)]
 							[new-env (extend-env vars old-vals env)]
 						)
 						(let loop ([old-vals old-vals])
@@ -63,31 +63,31 @@
 								) (loop (cdr old-vals)))
 							)
 						)
-						(eval-bodies bodies new-env)
+						(eval-bodies bodies new-env k)
 					)
 				]
 				[else (void)]
 			)
 		]
 		[lambda-exp (syms arg bodies)
-			(closure syms arg bodies env)
+			(apply-k k (closure syms arg bodies env))
 		]
 		[while-exp (predicate bodies)
 			(let loop ()
-				(if (eval-exp predicate env)
-					(begin (eval-bodies bodies env) (loop))
+				(if (eval-exp predicate env k)
+					(begin (eval-bodies bodies env k) (loop))
 				)
 			)
 		]
 		[define-exp (var val)
-			(let ([eval-val (eval-exp val env)])
+			(let ([eval-val (eval-exp val env k)])
 				(set-car! (cdr global-env) (cons var (cadr global-env)))
 				(set-car! (cddr global-env) (cons (cell eval-val) (caddr global-env)))
 			)
 		]
 		[set!-exp (var val)
 			(apply-env env var
-				(lambda (c) (cell-set! c (eval-exp val env)))
+				(lambda (c) (cell-set! c (eval-exp val env k)))
 				(lambda () (eopl:error 'apply-env
 					"variable not found in environment: ~s"
 					var
@@ -95,9 +95,9 @@
 			)
 		]
 		[app-exp (rator rands)
-			(let ([proc-value (eval-exp rator env)])
+			(let ([proc-value (eval-exp rator env k)])
 				(if (eq? proc-value 'quote) (unparse-exp (1th rands))
-					(apply-proc proc-value (eval-rands rands env))
+					(apply-proc proc-value (eval-rands rands env k) k)
 				)
 			)
 		]
@@ -106,16 +106,16 @@
 )
 
 ; evaluate the list of operands, putting results into a list
-(define (eval-rands rands env)
-	(map (lambda (item) (eval-exp item env)) rands)
+(define (eval-rands rands env k)
+	(map (lambda (item) (eval-exp item env k)) rands)
 )
 
-(define (eval-bodies bodies env)
+(define (eval-bodies bodies env k)
 	(if (null? (cdr bodies))
-		(eval-exp (car bodies) env)
+		(eval-exp (car bodies) env k)
 		(begin
-			(eval-exp (car bodies) env)
-			(eval-bodies (cdr bodies) env)
+			(eval-exp (car bodies) env k)
+			(eval-bodies (cdr bodies) env k)
 		)
 	)
 )
@@ -123,17 +123,17 @@
 ;  Apply a procedure to its arguments.
 ;  At this point, we only have primitive procedures.
 ;  User-defined procedures will be added later.
-(define (apply-proc proc-value args)
+(define (apply-proc proc-value args k)
 	(cases proc-val proc-value
-		[prim-proc (op) (apply-prim-proc op args)]
+		[prim-proc (op) (apply-prim-proc op args k)]
 		[closure (syms arg bodies env)
 			(cond
 				[(null? syms)
-					(run-closure bodies (extend-env (list arg) (list args) env))
+					(run-closure bodies (extend-env (list arg) (list args) env) k)
 				]
 				[(null? arg)
 					(if (= (length args) (length syms))
-						(run-closure bodies (extend-env syms args env))
+						(run-closure bodies (extend-env syms args env) k)
 						(error 'apply-proc "wrong number of arguments to #<procedure>")
 					)
 				]
@@ -141,7 +141,7 @@
 					(run-closure bodies (extend-env
 						(append syms (list arg))
 						(set-args (append syms arg) args)
-					env))
+					env) k)
 				]
 			)
 		]
@@ -162,19 +162,19 @@
 	)
 )
 
-(define (run-closure bodies env)
+(define (run-closure bodies env k)
 	(if (null? (cdr bodies))
-		(eval-exp (car bodies) env)
+		(eval-exp (car bodies) env k)
 		(begin
-			(eval-exp (car bodies) env)
-			(run-closure (cdr bodies) env)
+			(eval-exp (car bodies) env k)
+			(run-closure (cdr bodies) env k)
 		)
 	)
 )
 
 ; Usually an interpreter must define each
 ; built-in procedure individually.  We are "cheating" a little bit.
-(define (apply-prim-proc prim-proc args)
+(define (apply-prim-proc prim-proc args k)
 	(case prim-proc
 		[(+) (apply + args)]
 		[(-) (apply - args)]
@@ -222,10 +222,10 @@
 		[(cddar) (if (check-args args 1) (cddar (1th args)) (error-num-args prim-proc))]
 		[(cdadr) (if (check-args args 1) (cdadr (1th args)) (error-num-args prim-proc))]
 		[(cdddr) (if (check-args args 1) (cdddr (1th args)) (error-num-args prim-proc))]
-		[(apply) (apply-proc (1th args) (2th args))]
+		[(apply) (apply-proc (1th args) (2th args) k)]
 		[(map) (let loop ([proc (1th args)] [args (cdr args)])
 			(if (null? (car args)) '()
-				(cons (apply-proc proc (map car args)) (loop proc (map cdr args)))
+				(cons (apply-proc proc (map car args) k) (loop proc (map cdr args)))
 			)
 		)]
 		[(quotient) (quotient (1th args) (2th args))]
