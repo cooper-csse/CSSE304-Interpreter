@@ -10,6 +10,18 @@
 	)
 )
 
+(define (or-comp . preds)
+	(lambda (item)
+		(let loop ([preds preds])
+			(cond
+				[(null? preds) #f]
+				[((car preds) item) #t]
+				[else (loop (cdr preds))]
+			)
+		)
+	)
+)
+
 ; Ease of access for getting first, second, third... in a list
 (define 1th car)
 (define 2th cadr)
@@ -17,3 +29,7 @@
 (define 4th cadddr)
 (define (5th ls) (car (cddddr ls)))
 (define (6th ls) (cadr (cddddr ls)))
+
+(define (DEBUG msg)
+	(if #t (pretty-print msg))
+)

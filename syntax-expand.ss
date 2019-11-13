@@ -54,6 +54,7 @@
 				[else (app-exp rator (map syntax-expand rands))]
 			)
 		]
+		[void-exp () (void-exp)]
 		[else (eopl:error 'syntax-expand "Bad: ~a" exp)]
 	)
 )

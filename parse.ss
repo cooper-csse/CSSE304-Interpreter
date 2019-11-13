@@ -144,6 +144,10 @@
 								[else (for-exp (2th datum) (parse-exp (4th datum)) (parse-exp (6th datum)) (map parse-exp (cddr (cddddr datum))))]
 							)
 						]
+						[(eqv? (1th datum) 'void)
+							(void-exp)
+						]
+						[(eqv? (1th datum) 'quote) (lit-exp (2th datum))]
 						[else (app-exp (parse-exp (1th datum))
 							(map parse-exp (cdr datum))
 						)]
