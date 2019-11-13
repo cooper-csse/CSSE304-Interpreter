@@ -50,6 +50,7 @@
 		(rator expression?)
 		(rand (list-of expression?))
 	]
+	[void-exp]
 )
 
 (define-datatype let-type let-type?
