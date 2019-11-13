@@ -18,16 +18,16 @@
 
 (load-all)
 
-(define run-13 #t)
-(define run-14 #t)
-(define run-16 #t)
+(define run-13 #f)
+(define run-14 #f)
+(define run-16 #f)
 (define run-exam_02 #f)
-(define run-17a #t)
+(define run-17a #f)
 (define run-17b #f)
-(define run-18a #t)
+(define run-18a #f)
 (define run-18b #f)
 (define test-mode #f)
-(define run-tests #t)
+(define run-tests #f)
 
 (if run-tests
 	(if test-mode (begin
