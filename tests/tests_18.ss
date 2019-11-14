@@ -5,21 +5,6 @@
 ; offline tests.  So I am just including it here.
 ; You can copy the part after the quote and paste it into Scheme.
 
-'(begin
-  (reset-global-env)  ; answer: (3 1 2 1 1)
-  (eval-one-exp '
-   (define out (list)))
-  (eval-one-exp '
-   (define strange2
-   (lambda (x)
-     (set! out (cons 1 out))
-     (call/cc x)
-     (set! out (cons 2 out))
-     (call/cc x)
-     (set! out (cons 3 out)))))
-  (eval-one-exp '
-   (strange2 (call/cc (lambda (k) k))))
-  (eval-one-exp 'out))
 
 
 (define (test-legacy)
@@ -145,6 +130,8 @@
 		     9
 		     25
 		     (3 2 5 2 5)
+			 7
+			 (3 1 2 1 1)
 		     )]
           [answers
             (list
@@ -216,6 +203,21 @@
 					 (set! a (+ 3 a))
 					 a))))
 		  (f)))
+		  (begin
+			(reset-global-env)
+			(eval-one-exp '
+			(define out (list)))
+			(eval-one-exp '
+			(define strange2
+			(lambda (x)
+				(set! out (cons 1 out))
+				(call/cc x)
+				(set! out (cons 2 out))
+				(call/cc x)
+				(set! out (cons 3 out)))))
+			(eval-one-exp '
+			(strange2 (call/cc (lambda (k) k))))
+			(eval-one-exp 'out))
 	     )])
       (display-results correct answers equal?)))
 
