@@ -51,6 +51,8 @@
 		(k continuation?)
 	]
 	[set!-k
+		(env environment?)
+		(var symbol?)
 		(k continuation?)
 	]
 	[while-k
@@ -126,8 +128,14 @@
 				(set-car! (cddr global-env) (cons (cell v) (caddr global-env)))
 				(apply-k k (void))
 			]
-			[set!-k (k)
-				(success-k (lambda (c) (cell-set! c v)) k)
+			[set!-k (env var k)
+				(apply-env env var
+					(success-k (lambda (c) (cell-set! c v)) k)
+					(lambda () (eopl:error 'apply-env
+						"variable not found in environment: ~s"
+						var
+					))
+				)
 			]
 			[while-k (predicate bodies env k)
 				(if v

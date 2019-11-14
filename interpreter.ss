@@ -59,13 +59,7 @@
 			(eval-exp val env (define-k var k))
 		]
 		[set!-exp (var val)
-			(apply-env env var
-				(eval-exp val env (set!-k k))
-				(lambda () (eopl:error 'apply-env
-					"variable not found in environment: ~s"
-					var
-				))
-			)
+			(eval-exp val env (set!-k env var k))
 		]
 		[app-exp (rator rands)
 			(eval-exp rator env (rator-k rands env k))
@@ -101,6 +95,7 @@
 		[prim-proc (op)
 			(apply-prim-proc op args k)
 		]
+		[k-proc (k) (apply-k k (1th args))]
 		[closure (syms arg bodies env)
 			(cond
 				[(null? syms)
@@ -145,6 +140,8 @@
 		[(map) (let ([proc (1th args)] [ls (cadr args)])
 			(map-cps (lambda (x k) (apply-proc proc (list x) k)) ls k)
 		)]
+		[(call/cc) (apply-proc (1th args) (list (k-proc k)) k)]
+		[(exit-list) (apply-k (init-k) args)]
 		[else (apply-k k (case prim-proc
 			[(+) (apply + args)]
 			[(-) (apply - args)]

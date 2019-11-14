@@ -64,7 +64,7 @@
 	car cdr caar cadr cdar cddr caaar caadr
 	cadar caddr cdaar cdadr cddar cdddr
 	apply map quotient member append eqv? list-tail
-	even? = < > <= >=)
+	even? call/cc exit-list = < > <= >=)
 )
 
 (define (init-env)         ; for now, our initial global environment only contains

@@ -104,6 +104,7 @@
 	[prim-proc
 		(name symbol?)
 	]
+	[k-proc (k continuation?)]
 	[closure
 		(syms (lambda (x) (or ((list-of symbol?) x) (null? x))))
 		(arg (lambda (x) (or (symbol? x) (null? x))))
